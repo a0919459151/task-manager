@@ -82,7 +82,7 @@ const fetchTasks = async () => {
   try {
     const response = await client.getTasks();
     if (response.status === 200) {
-      tasks.value = response.body;
+      tasks.value = response.body.map(task => ({ ...task, id: task._id }));
     } else {
       console.error('Failed to fetch tasks:', response.error);
       // Handle error, e.g., show a message to the user
