@@ -42,7 +42,7 @@
       <TaskCard v-for="task in paginatedTasks" :key="task.id" :task="task" @delete="confirmDelete" />
     </div>
     <div v-else class="text-center text-gray-500 mt-12 text-lg">
-      目前沒有任務。
+      No tasks found
     </div>
 
     <div v-if="filteredTasks.length > itemsPerPage" class="flex justify-center mt-6 space-x-2">
@@ -54,13 +54,13 @@
 
     <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
-        <h3 class="text-lg font-bold mb-2">確認刪除</h3>
-        <p class="text-gray-600 mb-4">您確定要刪除這項任務嗎？此操作不可逆。</p>
+        <h3 class="text-lg font-bold mb-2">Confirm Deletion</h3>
+        <p class="text-gray-600 mb-4">Are you sure you want to delete this task? This action cannot be undone</p>
         <div class="flex justify-end space-x-2">
           <button @click="cancelDelete"
-            class="px-4 py-2 rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300">取消</button>
-          <button @click="executeDelete"
-            class="px-4 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700">確認刪除</button>
+            class="px-4 py-2 rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300">Cancel</button>
+          <button @click="executeDelete" class="px-4 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700">Confirm
+            Delete</button>
         </div>
       </div>
     </div>
@@ -71,27 +71,11 @@
 import { ref, computed, onMounted } from 'vue'; // Add onMounted
 import { useRouter } from 'vue-router';
 import TaskCard from '../components/TaskCard.vue';
-import { client } from '../api'; // Import the API client
+import { client } from '../api/taskApiClient'; // Import the API client
 
 const router = useRouter();
 
 const tasks = ref([]); // Initialize tasks as a ref
-
-// Fetch tasks from the backend
-const fetchTasks = async () => {
-  try {
-    const response = await client.getTasks();
-    if (response.status === 200) {
-      tasks.value = response.body.map(task => ({ ...task, id: task._id }));
-    } else {
-      console.error('Failed to fetch tasks:', response.error);
-      // Handle error, e.g., show a message to the user
-    }
-  } catch (error) {
-    console.error('Error fetching tasks:', error);
-    // Handle network error
-  }
-};
 
 // Fetch tasks when the component is mounted
 onMounted(fetchTasks);
@@ -128,6 +112,22 @@ const totalPages = computed(() => {
 const showDeleteModal = ref(false);
 const taskToDeleteId = ref(null);
 
+// Fetch tasks from the backend
+async function fetchTasks() {
+  try {
+    const response = await client.getTasks();
+    if (response.status === 200) {
+      tasks.value = response.body.map(task => ({ ...task, id: task._id }));
+    } else {
+      console.error('Failed to fetch tasks:', response.error);
+      // Handle error, e.g., show a message to the user
+    }
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    // Handle network error
+  }
+};
+
 function confirmDelete(id) {
   taskToDeleteId.value = id;
   showDeleteModal.value = true;
@@ -139,11 +139,10 @@ function cancelDelete() {
 }
 
 // Execute delete operation
-const executeDelete = async () => {
+async function executeDelete() {
   try {
     const response = await client.deleteTask({ params: { id: taskToDeleteId.value } });
     if (response.status === 200) {
-      console.log('Task deleted successfully');
       fetchTasks(); // Refresh the task list after deletion
     } else {
       console.error('Failed to delete task:', response.error);

@@ -14,7 +14,7 @@ export const taskRouter = s.router(taskContract, {
         title: task.title,
         content: task.content || '',
         status: task.status,
-        lastEdited: task.updatedAt.toISOString(), // 使用 updatedAt
+        lastEdited: task.updatedAt.toISOString(),
       })),
     };
   },

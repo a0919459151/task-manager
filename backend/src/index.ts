@@ -1,13 +1,13 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import cors from 'cors'; // 引入 cors 函式庫
+import cors from 'cors';
 import { createExpressEndpoints } from '@ts-rest/express';
 import { taskContract } from 'contracts';
 import { taskRouter } from './routes';
 import swaggerUi from 'swagger-ui-express';
 import { generateOpenApi } from '@ts-rest/open-api';
-import logger from './logger'; // 引入 logger
-import expressWinston from 'express-winston'; // 引入 express-winston
+import logger from './logger';
+import expressWinston from 'express-winston';
 
 const app = express();
 const port = 3000;
@@ -30,6 +30,11 @@ app.use(expressWinston.logger({
   ignoreRoute: function (req, res) { return false; } // optional: don't log certain routes
 }));
 
+// 使用 express-winston 記錄錯誤
+app.use(expressWinston.errorLogger({
+  winstonInstance: logger,
+}));
+
 // 連接 MongoDB
 const mongoUri = 'mongodb://localhost:27017/task-manager';
 mongoose.connect(mongoUri)
@@ -47,11 +52,6 @@ const openApiDocument = generateOpenApi(taskContract, {
 });
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
-
-// 使用 express-winston 記錄錯誤
-app.use(expressWinston.errorLogger({
-  winstonInstance: logger,
-}));
 
 app.listen(port, () => {
   logger.info(`🚀 Backend server running at http://localhost:${port}`);
