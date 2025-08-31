@@ -1,5 +1,5 @@
 import { initServer } from '@ts-rest/express';
-import { taskContract } from '../../../contracts/src/tasks';
+import { taskContract } from 'contracts';
 import Task from '../models/Task';
 
 const s = initServer();
@@ -12,7 +12,7 @@ export const taskRouter = s.router(taskContract, {
       body: tasks.map(task => ({
         _id: task._id.toString(),
         title: task.title,
-        content: task.content,
+        content: task.content || '',
         status: task.status,
         lastEdited: task.updatedAt.toISOString(), // 使用 updatedAt
       })),
@@ -28,7 +28,7 @@ export const taskRouter = s.router(taskContract, {
       body: {
         _id: task._id.toString(),
         title: task.title,
-        content: task.content,
+        content: task.content || '',
         status: task.status,
         lastEdited: task.updatedAt.toISOString(),
       },
@@ -42,7 +42,7 @@ export const taskRouter = s.router(taskContract, {
       body: {
         _id: task._id.toString(),
         title: task.title,
-        content: task.content,
+        content: task.content || '',
         status: task.status,
         lastEdited: task.updatedAt.toISOString(),
       },
@@ -58,7 +58,7 @@ export const taskRouter = s.router(taskContract, {
       body: {
         _id: task._id.toString(),
         title: task.title,
-        content: task.content,
+        content: task.content || '',
         status: task.status,
         lastEdited: task.updatedAt.toISOString(),
       },

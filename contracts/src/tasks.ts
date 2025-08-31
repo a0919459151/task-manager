@@ -50,10 +50,9 @@ export const taskContract = c.router({
       404: z.object({ message: z.string() }),
     },
   },
-  deleteTask: {
+    deleteTask: {
     method: 'DELETE',
     path: '/tasks/:id',
-    body: z.object({}),
     responses: {
       200: z.object({ message: z.string() }),
       404: z.object({ message: z.string() }),

@@ -2,8 +2,10 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors'; // 引入 cors 函式庫
 import { createExpressEndpoints } from '@ts-rest/express';
-import { taskContract } from '../../contracts/src/tasks';
+import { taskContract } from 'contracts';
 import { taskRouter } from './routes';
+import swaggerUi from 'swagger-ui-express';
+import { generateOpenApi } from '@ts-rest/open-api';
 
 const app = express();
 const port = 3000;
@@ -22,6 +24,15 @@ mongoose.connect(mongoUri)
 
 // 註冊 ts-rest 路由
 createExpressEndpoints(taskContract, taskRouter, app);
+
+const openApiDocument = generateOpenApi(taskContract, {
+  info: {
+    title: 'Task API',
+    version: '1.0.0',
+  },
+});
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
 app.listen(port, () => {
   console.log(`🚀 Backend server running at http://localhost:${port}`);

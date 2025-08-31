@@ -68,17 +68,35 @@
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue';
+import { ref, computed, onMounted } from 'vue'; // Add onMounted
 import { useRouter } from 'vue-router';
 import TaskCard from '../components/TaskCard.vue';
-
-// 注入從 App.vue 提供的資料和方法
-const tasks = inject('tasks');
-const deleteTask = inject('deleteTask');
+import { client } from '../api'; // Import the API client
 
 const router = useRouter();
 
-// 狀態過濾
+const tasks = ref([]); // Initialize tasks as a ref
+
+// Fetch tasks from the backend
+const fetchTasks = async () => {
+  try {
+    const response = await client.getTasks();
+    if (response.status === 200) {
+      tasks.value = response.body;
+    } else {
+      console.error('Failed to fetch tasks:', response.error);
+      // Handle error, e.g., show a message to the user
+    }
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    // Handle network error
+  }
+};
+
+// Fetch tasks when the component is mounted
+onMounted(fetchTasks);
+
+// Status filtering
 const currentFilter = ref('All');
 const filteredTasks = computed(() => {
   if (currentFilter.value === 'All') {
@@ -89,12 +107,12 @@ const filteredTasks = computed(() => {
 
 function filterTasks(status) {
   currentFilter.value = status;
-  currentPage.value = 1; // 過濾後重置到第一頁
+  currentPage.value = 1; // Reset to first page after filtering
 }
 
-// 分頁
+// Pagination
 const currentPage = ref(1);
-const itemsPerPage = 10; // 這裡設定每頁顯示 3 個項目
+const itemsPerPage = 10;
 
 const paginatedTasks = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
@@ -106,7 +124,7 @@ const totalPages = computed(() => {
   return Math.ceil(filteredTasks.value.length / itemsPerPage);
 });
 
-// 刪除確認視窗
+// Delete confirmation modal
 const showDeleteModal = ref(false);
 const taskToDeleteId = ref(null);
 
@@ -120,10 +138,24 @@ function cancelDelete() {
   taskToDeleteId.value = null;
 }
 
-function executeDelete() {
-  deleteTask(taskToDeleteId.value);
-  cancelDelete();
-}
+// Execute delete operation
+const executeDelete = async () => {
+  try {
+    const response = await client.deleteTask({ params: { id: taskToDeleteId.value } });
+    if (response.status === 200) {
+      console.log('Task deleted successfully');
+      fetchTasks(); // Refresh the task list after deletion
+    } else {
+      console.error('Failed to delete task:', response.error);
+      // Handle error
+    }
+  } catch (error) {
+    console.error('Error deleting task:', error);
+    // Handle network error
+  } finally {
+    cancelDelete();
+  }
+};
 
 function addTask() {
   router.push({ name: 'AddTask' });
