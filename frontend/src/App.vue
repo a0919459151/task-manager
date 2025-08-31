@@ -17,7 +17,7 @@ const tasks = ref([
 // 新增任務的方法
 function addTask(newTask) {
   const newId = tasks.value.length ? Math.max(...tasks.value.map(t => t.id)) + 1 : 1;
-  tasks.value.push({
+  tasks.value.unshift({  
     ...newTask,
     id: newId,
     lastEdited: new Date().toLocaleString(),

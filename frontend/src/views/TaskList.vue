@@ -94,7 +94,7 @@ function filterTasks(status) {
 
 // 分頁
 const currentPage = ref(1);
-const itemsPerPage = 3; // 這裡設定每頁顯示 3 個項目
+const itemsPerPage = 10; // 這裡設定每頁顯示 3 個項目
 
 const paginatedTasks = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
